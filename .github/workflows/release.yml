@@ -1,0 +1,56 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Build frontend dist
+      run: |
+        npm ci
+        npm run build
+
+    - name: Restore NuGet packages
+      run: |
+        dotnet restore Conslide/Conslide.csproj
+
+    - name: Build Conslide
+      run: |
+        dotnet build Conslide/Conslide.csproj -c Release --no-restore
+
+    - name: Install Velopack
+      run: |
+        dotnet tool install -g vpk
+
+    - name: Create Velopack Release
+      run: |
+        $version = "${{ github.ref_name }}".Replace("v", "")
+        vpk pack -u Conslide -v $version -p Conslide/bin/Release/net48 -e Conslide.exe
+
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          Releases/*.exe
+          Releases/*.nupkg
+          Releases/*.zip
+          Releases/*.json
+          Releases/RELEASES*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

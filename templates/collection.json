@@ -1,0 +1,92 @@
+[
+    {
+        "id": "tpl_executive_summary",
+        "name": "Executive Summary",
+        "category": "Structure",
+        "file": "ExecutiveSummary.pptx"
+    },
+    {
+        "id": "tpl_agenda",
+        "name": "Agenda / Table of Contents",
+        "category": "Structure",
+        "file": "Agenda.pptx"
+    },
+    {
+        "id": "tpl_3_column_bullets",
+        "name": "3-Column Breakdown",
+        "category": "Layout",
+        "file": "3ColumnLayout.pptx"
+    },
+    {
+        "id": "tpl_4_quadrant",
+        "name": "4-Quadrant / Matrix",
+        "category": "Layout",
+        "file": "4Quadrant.pptx"
+    },
+    {
+        "id": "tpl_horizontal_timeline",
+        "name": "Strategic Roadmap",
+        "category": "Timeline",
+        "file": "Roadmap.pptx"
+    },
+    {
+        "id": "tpl_vertical_timeline",
+        "name": "Project Milestones",
+        "category": "Timeline",
+        "file": "Milestones.pptx"
+    },
+    {
+        "id": "tpl_process_chevron",
+        "name": "Chevron Flow (5 Steps)",
+        "category": "Process",
+        "file": "ChevronFlow.pptx"
+    },
+    {
+        "id": "tpl_circular_process",
+        "name": "Circular Lifecycle",
+        "category": "Process",
+        "file": "CircularProcess.pptx"
+    },
+    {
+        "id": "tpl_swot_analysis",
+        "name": "SWOT Analysis",
+        "category": "Framework",
+        "file": "SWOT.pptx"
+    },
+    {
+        "id": "tpl_value_chain",
+        "name": "Value Chain",
+        "category": "Framework",
+        "file": "ValueChain.pptx"
+    },
+    {
+        "id": "tpl_issue_tree",
+        "name": "Issue / Decision Tree",
+        "category": "Framework",
+        "file": "IssueTree.pptx"
+    },
+    {
+        "id": "tpl_harvey_balls",
+        "name": "Harvey Ball Status Table",
+        "category": "Data & Status",
+        "file": "HarveyBalls.pptx"
+    },
+    {
+        "id": "tpl_gantt_chart",
+        "name": "Monthly Gantt Chart",
+        "category": "Schedule",
+        "file": "GanttChart.pptx"
+    },
+    {
+        "id": "tpl_org_chart",
+        "name": "Organization Structure",
+        "category": "Org",
+        "file": "OrgChart.pptx"
+    },
+    {
+        "id": "tpl_case_study",
+        "name": "Client Case Study",
+        "category": "Success Stories",
+        "file": "CaseStudy.pptx"
+    }
+]
