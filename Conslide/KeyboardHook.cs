@@ -24,6 +24,7 @@ namespace Conslide
 
         // ── State ─────────────────────────────────────────────────────────────
         public bool   IsTextEditing  { get; set; } = false;
+        public bool   IsPro          { get; set; } = false;
         public IntPtr PowerPointHwnd { get; private set; } = IntPtr.Zero;
 
         // Chord tracking
@@ -224,8 +225,8 @@ namespace Conslide
 
 
 
-            // Everything below: PPT must be active, no modifier, not text-editing
-            if (anyModForChords || IsTextEditing || IsInTextInputOrDialog() || !IsPowerPointFocused(out IntPtr currentHwnd))
+            // Everything below: PPT must be active, no modifier, not text-editing, and USER IS PRO
+            if (!IsPro || anyModForChords || IsTextEditing || IsInTextInputOrDialog() || !IsPowerPointFocused(out IntPtr currentHwnd))
                 return CallNextHookEx(_hookId, nCode, wParam, lParam);
             
             PowerPointHwnd = currentHwnd;

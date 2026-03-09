@@ -11,10 +11,10 @@ async function getHttpsOptions() {
             const httpsOptions = await devCerts.getHttpsServerOptions();
             return httpsOptions;
         } catch (err) {
-            return null;
+            return false;
         }
     }
-    return null;
+    return false;
 }
 
 module.exports = async (env, options) => {

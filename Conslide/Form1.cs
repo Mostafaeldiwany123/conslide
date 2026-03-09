@@ -113,8 +113,8 @@ namespace Conslide
             }
 
 #if DEBUG
-            // In debug mode, connect to the local webpack dev server
-            webView.Source = new Uri("https://localhost:3000/palette.html");
+            // In debug mode, connect to the local webpack dev server for live updates
+            webView.Source = new Uri("http://localhost:3000/palette.html");
 #else
             // In release mode, serve the static frontend app directly from the binary directory!
             webView.Source = new Uri("http://app.local/palette.html");
@@ -142,6 +142,20 @@ namespace Conslide
             _hook.OnChordStarted      += prefix => _chordHint.ShowHint(prefix, _hook.PowerPointHwnd);
             _hook.OnChordCancelled    += () => _chordHint.HideHint();
             _hook.Install();
+            UpdateProStatus();
+        }
+
+        private void UpdateProStatus()
+        {
+            try {
+                string sessionFile = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Conslide", "session.json");
+                if (System.IO.File.Exists(sessionFile)) {
+                    string json = System.IO.File.ReadAllText(sessionFile);
+                    _hook.IsPro = json.ToLower().Contains("\"tier\":\"pro\"");
+                } else {
+                    _hook.IsPro = false;
+                }
+            } catch { _hook.IsPro = false; }
         }
 
 
@@ -252,6 +266,7 @@ namespace Conslide
             if (System.IO.File.Exists(sessionFile)) {
                 try { sessionJson = System.IO.File.ReadAllText(sessionFile); } catch { }
             }
+            UpdateProStatus();
             webView.CoreWebView2.PostWebMessageAsString("FOCUS_WITH_SESSION:" + sessionJson);
 
             // Notify if update is ready to install
@@ -333,6 +348,7 @@ namespace Conslide
                         string json = System.IO.File.ReadAllText(sessionFile);
                         json = System.Text.RegularExpressions.Regex.Replace(json, "\"tier\"\\s*:\\s*\"[^\"]+\"", $"\"tier\":\"{newTier}\"");
                         System.IO.File.WriteAllText(sessionFile, json);
+                        UpdateProStatus();
                     } catch { }
                 }
                 return;

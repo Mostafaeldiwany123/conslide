@@ -161,7 +161,7 @@ namespace Conslide
             {
                 if (ev.TryGetWebMessageAsString() == "CONNECT")
                 {
-                    System.Diagnostics.Process.Start($"http://localhost:8080/login?port={port}");
+                    System.Diagnostics.Process.Start($"https://conslide.netlify.app/login?port={port}");
                     string waitingHtml = $@"
                     <html>
                     <head>

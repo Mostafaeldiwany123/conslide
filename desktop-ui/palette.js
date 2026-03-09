@@ -822,7 +822,7 @@ document.getElementById('generate-another-btn').addEventListener('click', () => 
 document.getElementById('profile-btn').addEventListener('click', () => {
     // Open profile page in default browser via C# or direct link
     if (window.chrome && window.chrome.webview) {
-        window.chrome.webview.postMessage('OPEN_URL:http://localhost:8080/profile');
+        window.chrome.webview.postMessage('OPEN_URL:https://conslide.netlify.app/profile');
     }
 });
 
