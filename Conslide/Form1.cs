@@ -16,12 +16,22 @@ namespace Conslide
         private System.Windows.Forms.Timer _stateTimer;
         private ChordHintForm _chordHint;
 
+        private bool _restorePaletteWhenPptFocused = false;
+
         private string _pendingWebMessage;
 
         [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr hWnd, out RECT r);
         [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")] static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
         [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
+        private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        private const int GWLP_HWNDPARENT = -8;
+
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+        private const int WS_EX_APPWINDOW = 0x00040000;
 
         [StructLayout(LayoutKind.Sequential)]
         struct RECT { public int Left, Top, Right, Bottom; }
@@ -84,6 +94,18 @@ namespace Conslide
     Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 24, 24));
 }
 
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                // Hide from Alt-Tab / task switcher
+                cp.ExStyle |= WS_EX_TOOLWINDOW;
+                cp.ExStyle &= ~WS_EX_APPWINDOW;
+                return cp;
+            }
+        }
+
         // ── WebView2 ──────────────────────────────────────────────────────────
         private async void SetupWebView()
         {
@@ -129,7 +151,13 @@ namespace Conslide
             IntPtr fg = GetForegroundWindow();
             if (fg == this.Handle || fg == _chordHint?.Handle) return;
 
-            if (Opacity > 0) HidePalette();
+            if (Opacity > 0)
+            {
+                // Only auto-restore when the palette was hidden because we switched AWAY from PowerPoint.
+                // If the user clicked inside PowerPoint, treat it as an intentional close.
+                _restorePaletteWhenPptFocused = !IsPptWindow(fg);
+                HidePalette();
+            }
         }
 
         // ── Keyboard hook ─────────────────────────────────────────────────────
@@ -201,14 +229,39 @@ namespace Conslide
 
                 if (!isOurUI && !isPpt)
                 {
-                    if (Opacity > 0) HidePalette();
+                    if (Opacity > 0)
+                    {
+                        _restorePaletteWhenPptFocused = true;
+                        HidePalette();
+                    }
                     _chordHint?.HideHint();
                     _hook.Reset();
+                }
+
+                // If the user clicked back into PowerPoint, treat it as an intentional close.
+                if (!isOurUI && isPpt && Opacity > 0)
+                {
+                    _restorePaletteWhenPptFocused = false;
+                    HidePalette();
+                }
+
+                // If we hid the palette only because PPT wasn't focused, restore it when PPT comes back.
+                if (isPpt && _restorePaletteWhenPptFocused && Opacity == 0)
+                {
+                    RestorePaletteToPowerPoint();
                 }
 
                 // (We stay asleep in the background even if PPT closes, so if they re-open PPT later, we are still ready to help!)
             };
             _stateTimer.Start();
+        }
+
+        private void EnsureOwnedByPowerPoint(IntPtr pptHwnd)
+        {
+            if (pptHwnd == IntPtr.Zero) return;
+            // Owner relationship helps keep the palette attached to PPT and keeps it out of Alt-Tab.
+            try { _ = Handle; } catch { return; }
+            try { SetWindowLongPtr(this.Handle, GWLP_HWNDPARENT, pptHwnd); } catch { }
         }
 
         private bool IsPptWindow(IntPtr hwnd)
@@ -233,6 +286,9 @@ namespace Conslide
 
             IntPtr pptHwnd = _hook.PowerPointHwnd;
             if (pptHwnd == IntPtr.Zero) return;
+
+            _restorePaletteWhenPptFocused = false;
+            EnsureOwnedByPowerPoint(pptHwnd);
 
             if (GetWindowRect(pptHwnd, out RECT r))
             {
@@ -287,6 +343,34 @@ namespace Conslide
             Activate();
             webView.Select();
             webView.Focus();
+        }
+
+        private void RestorePaletteToPowerPoint()
+        {
+            try
+            {
+                IntPtr pptHwnd = _hook.PowerPointHwnd;
+                if (pptHwnd == IntPtr.Zero) return;
+
+                EnsureOwnedByPowerPoint(pptHwnd);
+
+                if (GetWindowRect(pptHwnd, out RECT r))
+                {
+                    int w = r.Right - r.Left;
+                    int h = r.Bottom - r.Top;
+                    Left = r.Left + (w - Width) / 2;
+                    Top = r.Top + (int)(h * 0.28);
+                }
+
+                // Show without stealing focus from PowerPoint
+                this.Show();
+                this.Opacity = 1;
+                _restorePaletteWhenPptFocused = false;
+            }
+            catch
+            {
+                // no-op
+            }
         }
 
         // ── Direct command routing (from keyboard shortcut, no palette) ───────
@@ -418,6 +502,14 @@ namespace Conslide
                 return;
             }
 
+            if (msg.StartsWith("EDIT_CURRENT_SLIDE_FROM_JSON:"))
+            {
+                string json = msg.Substring("EDIT_CURRENT_SLIDE_FROM_JSON:".Length);
+                string result = _ppt.EditCurrentSlideFromJson(json);
+                webView.CoreWebView2.PostWebMessageAsString("AGENT_RESULT:" + result);
+                return;
+            }
+
             if (msg == "GET_PPT_CONTEXT")
             {
                 int slideCount = _ppt.GetSlideCount();
@@ -425,6 +517,13 @@ namespace Conslide
                 string slideText = _ppt.GetSlideText();
                 string context = $"{{\"slideCount\":{slideCount},\"currentSlide\":{currentSlide},\"slideText\":{slideText}}}";
                 webView.CoreWebView2.PostWebMessageAsString("PPT_CONTEXT:" + context);
+                return;
+            }
+
+            if (msg == "GET_SLIDE_JSON")
+            {
+                string slideJson = _ppt.GetCurrentSlideAsJson();
+                webView.CoreWebView2.PostWebMessageAsString("SLIDE_JSON:" + slideJson);
                 return;
             }
 

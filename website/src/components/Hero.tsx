@@ -30,7 +30,7 @@ const Hero = () => {
               className="bg-purple-600 hover:bg-purple-700 text-white text-base px-8"
             >
               <Download className="w-5 h-5 mr-2" />
-              Install Version 1.0
+              Install Conslide
             </Button>
           ) : (
             <>
@@ -40,7 +40,7 @@ const Hero = () => {
                 className="bg-purple-600 hover:bg-purple-700 text-white text-base px-8"
               >
                 <Download className="w-5 h-5 mr-2" />
-                Install Version 1.0
+                Install Conslide
               </Button>
               <Button
                 size="lg"

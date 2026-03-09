@@ -72,48 +72,225 @@
                             <path d="M15 18l-6-6 6-6" />
                         </svg>
                     </div>
-                    Generate Slide
-                </div>
-
-                <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
-                    <!-- Input State -->
-                    <div id="generate-input-container" style="padding: 16px; margin-top: 10px;">
-                        <textarea id="generate-prompt"
-                            placeholder="Describe the slide you want to create (e.g. 'A 4-part strategy timeline for Q3')..."
-                            spellcheck="false"></textarea>
-                    </div>
-
-                    <!-- Loading State -->
-                    <div id="generate-loading-container"
-                        style="display: none; flex: 1; min-height: 200px; padding: 24px; text-align: center; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
-                        <div class="spinner" style="width: 36px; height: 36px; border-width: 3px;"></div>
-                        <div id="generate-status"
-                            style="font-size: 15px; font-weight: 500; color: var(--text-main); height: 24px; display: flex; align-items: center; justify-content: center;">
-                        </div>
-                    </div>
-
-                    <!-- Success State -->
-                    <div id="generate-success-container"
-                        style="display: none; flex: 1; min-height: 200px; padding: 24px; text-align: center; flex-direction: column; align-items: center; justify-content: center; gap: 20px;">
-                        <div class="success-circle">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 6L9 17l-5-5" />
-                            </svg>
-                        </div>
-                        <div id="generate-explanation"
-                            style="font-size: 14px; color: var(--text-strong); line-height: 1.6; max-width: 90%;"></div>
-                        <button id="generate-another-btn"
-                            style="margin-top: 10px; padding: 10px 16px; border: none; border-radius: 8px; background: var(--border); color: var(--text-strong); font-weight: 600; cursor: pointer; transition: background 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;">Generate
-                            Another</button>
+                    AI Agent
+                    <div class="customize-agent-btn" id="customize-agent-btn" style="float: right;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        Customize
                     </div>
                 </div>
 
-                <div class="footer" id="generate-footer">
-                    <span class="f-hint"><kbd>Esc</kbd> Cancel</span>
-                    <span class="f-hint" id="generate-action-hint"><kbd>↵</kbd> Generate</span>
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <!-- Initial Greeting -->
+                        <div class="chat-greeting" id="chat-greeting">
+                            <div class="chat-greeting-icon">
+                                <img src="conslide_favicon.png" width="80" height="80" style="object-fit: contain;">
+                            </div>
+                            <h2 class="chat-greeting-title">Design and Conslide time?</h2>
+                            <span class="chat-greeting-subtitle">Let's create your dream slide in seconds</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-wrapper">
+                        <div class="chat-input-box">
+                            <div class="chat-input-top">
+                                <textarea id="chat-input" placeholder="How can I help you today?"
+                                    spellcheck="false"></textarea>
+                            </div>
+                            <div class="chat-input-bottom">
+                                <div class="chat-add-btn" title="Add Attachment">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </div>
+                                <div class="chat-model-controls">
+                                    <div class="chat-send-btn" id="chat-send-btn"
+                                        style="opacity: 0; pointer-events: none;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                                            <polyline points="5 12 12 5 19 12"></polyline>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Customize Agent overlay -->
+            <div id="customize-agent-menu" class="lang-menu">
+                <div class="lang-header">
+                    <div class="back-btn" id="customize-agent-back">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                    </div>
+                    Customize Agent
+                </div>
+                <div class="customize-agent-content">
+                    <div class="customize-section">
+                        <!-- Color Palette Selection -->
+                        <div class="customize-group">
+                            <label class="customize-label">Color Palette</label>
+                            <p class="customize-desc">Choose the color scheme for generated slides</p>
+                            <div class="palette-options">
+                                <div class="palette-option selected" data-palette="default">
+                                    <div class="palette-preview default">
+                                        <span class="palette-color" style="background: #1e3a8a;"></span>
+                                        <span class="palette-color" style="background: #2563eb;"></span>
+                                        <span class="palette-color" style="background: #3b82f6;"></span>
+                                        <span class="palette-color" style="background: #ffffff; border: 1px solid #e2e8f0;"></span>
+                                    </div>
+                                    <span class="palette-name">Default (Navy Blue)</span>
+                                </div>
+                                <div class="palette-option" data-palette="emerald">
+                                    <div class="palette-preview emerald">
+                                        <span class="palette-color" style="background: #064e3b;"></span>
+                                        <span class="palette-color" style="background: #059669;"></span>
+                                        <span class="palette-color" style="background: #10b981;"></span>
+                                        <span class="palette-color" style="background: #ffffff; border: 1px solid #e2e8f0;"></span>
+                                    </div>
+                                    <span class="palette-name">Emerald</span>
+                                </div>
+                                <div class="palette-option" data-palette="purple">
+                                    <div class="palette-preview purple">
+                                        <span class="palette-color" style="background: #4c1d95;"></span>
+                                        <span class="palette-color" style="background: #7c3aed;"></span>
+                                        <span class="palette-color" style="background: #a78bfa;"></span>
+                                        <span class="palette-color" style="background: #ffffff; border: 1px solid #e2e8f0;"></span>
+                                    </div>
+                                    <span class="palette-name">Purple</span>
+                                </div>
+                                <div class="palette-option" data-palette="rose">
+                                    <div class="palette-preview rose">
+                                        <span class="palette-color" style="background: #881337;"></span>
+                                        <span class="palette-color" style="background: #e11d48;"></span>
+                                        <span class="palette-color" style="background: #fb7185;"></span>
+                                        <span class="palette-color" style="background: #ffffff; border: 1px solid #e2e8f0;"></span>
+                                    </div>
+                                    <span class="palette-name">Rose</span>
+                                </div>
+                                <div class="palette-option" data-palette="amber">
+                                    <div class="palette-preview amber">
+                                        <span class="palette-color" style="background: #78350f;"></span>
+                                        <span class="palette-color" style="background: #d97706;"></span>
+                                        <span class="palette-color" style="background: #fbbf24;"></span>
+                                        <span class="palette-color" style="background: #ffffff; border: 1px solid #e2e8f0;"></span>
+                                    </div>
+                                    <span class="palette-name">Amber</span>
+                                </div>
+                                <div class="palette-option" data-palette="slate">
+                                    <div class="palette-preview slate">
+                                        <span class="palette-color" style="background: #1e293b;"></span>
+                                        <span class="palette-color" style="background: #475569;"></span>
+                                        <span class="palette-color" style="background: #94a3b8;"></span>
+                                        <span class="palette-color" style="background: #ffffff; border: 1px solid #e2e8f0;"></span>
+                                    </div>
+                                    <span class="palette-name">Slate</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Agent Type Selection -->
+                        <div class="customize-group">
+                            <label class="customize-label">Agent Type</label>
+                            <p class="customize-desc">Select the style and expertise of your AI agent</p>
+                            <div class="agent-type-options">
+                                <div class="agent-type-option selected" data-type="consultant">
+                                    <div class="agent-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                            <path d="M2 17l10 5 10-5"/>
+                                            <path d="M2 12l10 5 10-5"/>
+                                        </svg>
+                                    </div>
+                                    <div class="agent-type-info">
+                                        <span class="agent-type-name">Consultant</span>
+                                        <span class="agent-type-desc">McKinsey-style strategic slides</span>
+                                    </div>
+                                </div>
+                                <div class="agent-type-option" data-type="teacher">
+                                    <div class="agent-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                                        </svg>
+                                    </div>
+                                    <div class="agent-type-info">
+                                        <span class="agent-type-name">Teacher</span>
+                                        <span class="agent-type-desc">Educational & explanatory slides</span>
+                                    </div>
+                                </div>
+                                <div class="agent-type-option" data-type="minimalist">
+                                    <div class="agent-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            <path d="M9 9h6M9 12h6M9 15h4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="agent-type-info">
+                                        <span class="agent-type-name">Minimalist</span>
+                                        <span class="agent-type-desc">Clean, simple designs</span>
+                                    </div>
+                                </div>
+                                <div class="agent-type-option" data-type="creative">
+                                    <div class="agent-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="agent-type-info">
+                                        <span class="agent-type-name">Creative</span>
+                                        <span class="agent-type-desc">Bold, artistic layouts</span>
+                                    </div>
+                                </div>
+                                <div class="agent-type-option" data-type="executive">
+                                    <div class="agent-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                            <path d="M8 21h8M12 17v4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="agent-type-info">
+                                        <span class="agent-type-name">Executive</span>
+                                        <span class="agent-type-desc">C-suite ready presentations</span>
+                                    </div>
+                                </div>
+                                <div class="agent-type-option" data-type="storyteller">
+                                    <div class="agent-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="agent-type-info">
+                                        <span class="agent-type-name">Storyteller</span>
+                                        <span class="agent-type-desc">Narrative-driven slides</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Instructions -->
+                        <div class="customize-group">
+                            <label class="customize-label">Custom Instructions</label>
+                            <p class="customize-desc">Add specific instructions for the AI agent to follow</p>
+                            <textarea class="custom-instructions-input" placeholder="e.g., Always use bullet points, avoid jargon, focus on data visualization..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Search -->
             <div class="search-bar">
                 <span class="search-icon">
@@ -133,9 +310,10 @@
             <!-- Footer -->
             <div class="footer">
                 <span class="f-profile" id="profile-btn" title="My Profile">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
                     </svg>
                     Profile
                 </span>
@@ -148,6 +326,7 @@
     </div>
 
     <script src="api.js"></script>
+    <script src="chatbot.js"></script>
 
 </body>
 

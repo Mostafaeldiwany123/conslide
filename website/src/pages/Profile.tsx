@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, BarChart3, Settings, CreditCard, Bell, Shield, LogOut } from 'lucide-react';
+import { ArrowLeft, User, BarChart3, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-type Tab = 'profile' | 'usage' | 'settings';
+type Tab = 'profile' | 'usage';
 
 const Profile = () => {
   const { user, profile, signOut } = useAuth();
@@ -47,7 +47,7 @@ const Profile = () => {
 
   const tier = profile?.tier || 'free';
   const creditsUsed = profile?.token_usage || 0;
-  const creditsLimit = profile?.token_limit || (tier === 'pro' ? 100 : 0);
+  const creditsLimit = tier === 'pro' ? (profile?.token_limit || 100) : 0;
   const usagePercent = creditsLimit > 0 ? (creditsUsed / creditsLimit) * 100 : 0;
 
   const handleSignOut = async () => {
@@ -58,7 +58,6 @@ const Profile = () => {
   const tabs = [
     { id: 'profile' as Tab, label: 'Profile', icon: User },
     { id: 'usage' as Tab, label: 'Usage', icon: BarChart3 },
-    { id: 'settings' as Tab, label: 'Settings', icon: Settings },
   ];
 
   return (
@@ -207,10 +206,16 @@ const Profile = () => {
                     )}
                   </div>
 
-                  <Button variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50">
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Upgrade Plan
-                  </Button>
+                  {tier === 'free' && (
+                    <Button 
+                      variant="outline" 
+                      className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                      onClick={() => navigate('/pricing')}
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Upgrade Plan
+                    </Button>
+                  )}
                 </div>
 
                 {/* AI Features Info */}
@@ -251,91 +256,6 @@ const Profile = () => {
                       Rewrite as Bullets (1 credit per rewrite)
                     </li>
                   </ul>
-                </div>
-
-                {/* Usage History */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
-                  <div className="text-center py-8 text-gray-500">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>No recent activity to display</p>
-                    <p className="text-sm mt-1">Start using Conslide to see your usage history</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                {/* Notifications */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <Bell className="w-5 h-5 text-gray-400" />
-                    <h2 className="text-lg font-medium text-gray-900">Notifications</h2>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Email notifications</p>
-                        <p className="text-sm text-gray-500">Receive updates about your account</p>
-                      </div>
-                      <input type="checkbox" className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Product updates</p>
-                        <p className="text-sm text-gray-500">News about new features and improvements</p>
-                      </div>
-                      <input type="checkbox" className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" defaultChecked />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Security */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <Shield className="w-5 h-5 text-gray-400" />
-                    <h2 className="text-lg font-medium text-gray-900">Security</h2>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Password</p>
-                        <p className="text-sm text-gray-500">Last changed 30 days ago</p>
-                      </div>
-                      <Button variant="outline" size="sm">Change</Button>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Two-factor authentication</p>
-                        <p className="text-sm text-gray-500">Add an extra layer of security</p>
-                      </div>
-                      <Button variant="outline" size="sm">Enable</Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Danger Zone */}
-                <div className="bg-white rounded-xl border border-red-200 p-6">
-                  <h2 className="text-lg font-medium text-red-600 mb-2">Danger Zone</h2>
-                  <p className="text-sm text-gray-500 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
-                  <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300">
-                    Delete Account
-                  </Button>
-                </div>
-
-                {/* Sign Out */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <Button
-                    onClick={handleSignOut}
-                    variant="outline"
-                    className="w-full sm:w-auto"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
-                  </Button>
                 </div>
               </div>
             )}

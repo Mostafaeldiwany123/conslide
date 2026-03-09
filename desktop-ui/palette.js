@@ -27,6 +27,7 @@ const ICONS = {
     tableRow: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="4" rx="1" stroke="currentColor" stroke-width="1.2" opacity=".4"/><rect x="1" y="9" width="14" height="4" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M8 10.5v1M7 11h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,
     tableCol: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.2" opacity=".4"/><rect x="9" y="1" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 8h1M11 7v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,
     ai: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 3.5L13 6l-3.5 1.5L8 11l-1.5-3.5L3 6l3.5-1.5L8 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M13 11l.7 1.5 1.5.7-1.5.7L13 15l-.7-1.5L10.8 13l1.5-.7L13 11z" fill="currentColor" opacity=".5"/></svg>`,
+    agent: `<img src="conslide_favicon.png" width="14" height="14" style="object-fit: contain; vertical-align: middle;">`,
     matchStyle: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 3l-2-2L4 8l-1 5 5-1 7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="3" cy="13" r="1" fill="currentColor"/></svg>`,
     autoFit: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="1" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 1"/><path d="M5 8h6M6 6l-1 2 1 2M10 6l1 2-1 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 };
@@ -65,7 +66,7 @@ const COMMANDS = [
     { id: 'add-row', name: 'Add Table Row', cat: 'Smart', icon: ICONS.tableRow, sc: null },
     { id: 'add-col', name: 'Add Table Column', cat: 'Smart', icon: ICONS.tableCol, sc: null },
     // AI ─────────────────────────────────────────────────
-    { id: 'ai-generate-slide', name: 'Generate Slide', cat: 'AI', icon: ICONS.ai, sc: null },
+    { id: 'ai-generate-slide', name: 'AI Agent', cat: 'AI', icon: ICONS.ai, sc: null },
     { id: 'translate-page', name: 'Translate Page', cat: 'AI', icon: ICONS.ai, sc: null },
     { id: 'ai-lead', name: 'Generate Lead Sentence', cat: 'AI', icon: ICONS.ai, sc: null },
     { id: 'ai-rewrite', name: 'Rewrite Text Professionally', cat: 'AI', icon: ICONS.ai, sc: null },
@@ -102,27 +103,12 @@ const optionsMenu = document.getElementById('options-menu');
 const generateMenu = document.getElementById('generate-menu');
 const generatePrompt = document.getElementById('generate-prompt');
 const loader = document.getElementById('loader');
+const customizeAgentMenu = document.getElementById('customize-agent-menu');
 
 let generateState = 'input'; // 'input', 'loading', 'success'
 
 function renderGenerateMenu() {
-    const inputCont = document.getElementById('generate-input-container');
-    const loadCont = document.getElementById('generate-loading-container');
-    const succCont = document.getElementById('generate-success-container');
-    const hint = document.getElementById('generate-action-hint');
-
-    if (inputCont) inputCont.style.display = generateState === 'input' ? 'block' : 'none';
-    if (loadCont) loadCont.style.display = generateState === 'loading' ? 'flex' : 'none';
-    if (succCont) succCont.style.display = generateState === 'success' ? 'flex' : 'none';
-
-    if (hint) {
-        if (generateState === 'input') {
-            hint.innerHTML = '<kbd>↵</kbd> Generate';
-            hint.style.display = 'flex';
-        } else {
-            hint.style.display = 'none';
-        }
-    }
+    // The chat UI manages its own state in chatbot.js now
 }
 
 function render() {
@@ -130,24 +116,34 @@ function render() {
         langMenu.style.display = 'flex';
         optionsMenu.style.display = 'none';
         generateMenu.style.display = 'none';
+        customizeAgentMenu.style.display = 'none';
         renderLanguages();
         return;
     } else if (currentView === 'options-menu') {
         optionsMenu.style.display = 'flex';
         langMenu.style.display = 'none';
         generateMenu.style.display = 'none';
+        customizeAgentMenu.style.display = 'none';
         renderOptions();
         return;
     } else if (currentView === 'generate-menu') {
         generateMenu.style.display = 'flex';
         langMenu.style.display = 'none';
         optionsMenu.style.display = 'none';
+        customizeAgentMenu.style.display = 'none';
         renderGenerateMenu();
+        return;
+    } else if (currentView === 'customize-agent') {
+        customizeAgentMenu.style.display = 'flex';
+        generateMenu.style.display = 'none';
+        langMenu.style.display = 'none';
+        optionsMenu.style.display = 'none';
         return;
     } else {
         langMenu.style.display = 'none';
         optionsMenu.style.display = 'none';
         generateMenu.style.display = 'none';
+        customizeAgentMenu.style.display = 'none';
         currentView = 'home';
     }
 
@@ -312,9 +308,14 @@ async function run(cmd) {
 
     if (cmd.id === 'ai-generate-slide') {
         currentView = 'generate-menu';
-        generateState = 'input';
         render();
-        setTimeout(() => generatePrompt.focus(), 50);
+        if (window.initChatbot) {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    window.initChatbot();
+                });
+            });
+        }
         return;
     }
 
@@ -471,95 +472,7 @@ function formatAgentText(text) {
     return text;
 }
 
-let typewriterInterval;
-function startTypewriter() {
-    const el = document.getElementById('generate-status');
-    const phrases = [
-        "Analyzing your request...",
-        "Structuring the content...",
-        "Applying optimal layout...",
-        "Refining the design...",
-        "Finalizing slide elements..."
-    ];
-    let phraseIdx = 0;
-    let charIdx = 0;
-    let isDeleting = false;
-
-    el.innerHTML = '<span id="generate-status-text"></span><span class="tw-cursor"></span>';
-    const spanText = document.getElementById('generate-status-text');
-
-    function tick() {
-        if (!el.isConnected || generateState !== 'loading') return;
-
-        let currentPhrase = phrases[phraseIdx];
-        if (isDeleting) {
-            spanText.textContent = currentPhrase.substring(0, charIdx - 1);
-            charIdx--;
-        } else {
-            spanText.textContent = currentPhrase.substring(0, charIdx + 1);
-            charIdx++;
-        }
-
-        let typeSpeed = isDeleting ? 30 : 50;
-
-        if (!isDeleting && charIdx === currentPhrase.length) {
-            typeSpeed = 1500; // Pause at end of phrase
-            isDeleting = true;
-        } else if (isDeleting && charIdx === 0) {
-            isDeleting = false;
-            phraseIdx = (phraseIdx + 1) % phrases.length;
-            typeSpeed = 300; // Pause before typing next
-        }
-
-        typewriterInterval = setTimeout(tick, typeSpeed);
-    }
-    tick();
-}
-
-function stopTypewriter() {
-    clearTimeout(typewriterInterval);
-}
-
-async function submitGenerateSlide() {
-    const prompt = generatePrompt.value.trim();
-    if (!prompt) return;
-
-    generateState = 'loading';
-    renderGenerateMenu();
-    startTypewriter();
-
-    try {
-        let result = await fetchAIGenerateSlide(prompt, "{}");
-        let slideJson = result.slideJson;
-        let explanation = result.explanation;
-
-        let action = 'create';
-        try {
-            const parsed = JSON.parse(slideJson);
-            if (parsed.action === 'edit') action = 'edit';
-        } catch (e) { }
-
-        document.getElementById('generate-status').textContent = 'Applying changes...';
-
-        const command = action === 'edit' ? 'EDIT_CURRENT_SLIDE_FROM_JSON:' : 'CREATE_SLIDE_FROM_JSON:';
-        send(command + slideJson);
-
-        stopTypewriter();
-        document.getElementById('generate-explanation').innerHTML = formatAgentText(explanation) || 'Slide generated successfully.';
-        generateState = 'success';
-        renderGenerateMenu();
-
-        // Close palette instantly
-        closePalette();
-
-    } catch (err) {
-        console.error(err);
-        stopTypewriter();
-        generateState = 'input';
-        renderGenerateMenu();
-        showError("Generation failed: " + err.message, 'generate-menu');
-    }
-}
+// Typewriter and generate logic moved to chatbot.js
 
 function closePalette() {
     input.value = '';
@@ -623,19 +536,7 @@ input.addEventListener('input', () => {
     sel = 0;
 });
 
-generatePrompt.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        e.stopPropagation(); // Prevent the main keydown handler from triggering run()
-        submitGenerateSlide();
-    }
-    if (e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        currentView = 'home';
-        render();
-    }
-});
+// Generate slide enter command moved to chatbot.js
 
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
@@ -728,7 +629,11 @@ if (window.chrome && window.chrome.webview) {
                 input.select();
             } else {
                 render();
-                generatePrompt.focus();
+                if (window.initChatbot) window.initChatbot();
+                // Fetch current slide JSON for AI context
+                if (window.chrome && window.chrome.webview) {
+                    window.chrome.webview.postMessage('GET_SLIDE_JSON');
+                }
             }
         }
         if (e.data.startsWith('SLIDE_TEXT:')) {
@@ -812,12 +717,93 @@ document.getElementById('generate-back').addEventListener('click', () => {
     render();
 });
 
-document.getElementById('generate-another-btn').addEventListener('click', () => {
-    generateState = 'input';
-    generatePrompt.value = '';
-    renderGenerateMenu();
-    generatePrompt.focus();
+document.getElementById('customize-agent-btn').addEventListener('click', () => {
+    currentView = 'customize-agent';
+    render();
 });
+
+document.getElementById('customize-agent-back').addEventListener('click', () => {
+    currentView = 'generate-menu';
+    render();
+});
+
+// Initialize customization settings from localStorage
+function initCustomizationSettings() {
+    // Load saved values or use defaults
+    const savedAgentType = localStorage.getItem('conslide_agentType') || 'consultant';
+    const savedColorPalette = localStorage.getItem('conslide_colorPalette') || 'default';
+    const savedCustomInstructions = localStorage.getItem('conslide_customInstructions') || '';
+
+    // Ensure defaults are saved to localStorage if not present
+    if (!localStorage.getItem('conslide_agentType')) {
+        localStorage.setItem('conslide_agentType', 'consultant');
+    }
+    if (!localStorage.getItem('conslide_colorPalette')) {
+        localStorage.setItem('conslide_colorPalette', 'default');
+    }
+
+    // Set agent type selection
+    document.querySelectorAll('.agent-type-option').forEach(opt => {
+        opt.classList.remove('selected');
+        if (opt.dataset.type === savedAgentType) {
+            opt.classList.add('selected');
+        }
+    });
+
+    // Set color palette selection
+    document.querySelectorAll('.palette-option').forEach(opt => {
+        opt.classList.remove('selected');
+        if (opt.dataset.palette === savedColorPalette) {
+            opt.classList.add('selected');
+        }
+    });
+
+    // Set custom instructions
+    const textarea = document.querySelector('.custom-instructions-input');
+    if (textarea) {
+        textarea.value = savedCustomInstructions;
+    }
+}
+
+// Color palette selection
+document.querySelectorAll('.palette-option').forEach(option => {
+    option.addEventListener('click', () => {
+        document.querySelectorAll('.palette-option').forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        localStorage.setItem('conslide_colorPalette', option.dataset.palette);
+    });
+});
+
+// Agent type selection
+document.querySelectorAll('.agent-type-option').forEach(option => {
+    option.addEventListener('click', () => {
+        document.querySelectorAll('.agent-type-option').forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        localStorage.setItem('conslide_agentType', option.dataset.type);
+    });
+});
+
+// Custom instructions input
+const customInstructionsInput = document.querySelector('.custom-instructions-input');
+if (customInstructionsInput) {
+    customInstructionsInput.addEventListener('input', () => {
+        localStorage.setItem('conslide_customInstructions', customInstructionsInput.value);
+    });
+}
+
+// Initialize settings when customize agent view is shown
+const originalRender = render;
+render = function() {
+    originalRender();
+    if (currentView === 'customize-agent') {
+        initCustomizationSettings();
+    }
+};
+
+// Call init on load
+initCustomizationSettings();
+
+// generate-another-btn logic removed since chat interface is persistent
 
 document.getElementById('profile-btn').addEventListener('click', () => {
     // Open profile page in default browser via C# or direct link

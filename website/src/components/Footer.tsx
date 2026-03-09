@@ -58,9 +58,9 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-gray-900 mb-4">Product</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                <Link to="/#features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                   Features
-                </a>
+                </Link>
               </li>
               <li>
                 <Link to="/pricing" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
@@ -68,14 +68,14 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#how-it-works" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                <Link to="/#how-it-works" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                   How it works
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#faq" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                <Link to="/#faq" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                   FAQ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

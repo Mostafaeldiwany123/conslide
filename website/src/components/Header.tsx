@@ -58,10 +58,10 @@ const Header = () => {
   };
 
   const navLinks = [
-    { label: 'Features', href: '/#features' },
-    { label: 'How it works', href: '/#how-it-works' },
+    { label: 'Features', to: '/#features' },
+    { label: 'How it works', to: '/#how-it-works' },
     { label: 'Pricing', to: '/pricing' },
-    { label: 'FAQ', href: '/#faq' },
+    { label: 'FAQ', to: '/#faq' },
   ];
 
   return (
@@ -80,38 +80,28 @@ const Header = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) =>
-              link.to ? (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {link.label}
-                </a>
-              )
-            )}
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                to={link.to}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
             {user ? (
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0">
+                  <button className="group flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&[data-state=open]]:bg-gray-50">
                     <Avatar />
                     <span className="text-sm font-medium text-gray-700">{getDisplayName()}</span>
-                    <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-200 data-[state=open]:rotate-180" />
+                    <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48" sideOffset={8}>
+                <DropdownMenuContent align="end" className="w-48 bg-white shadow-lg border border-gray-200" sideOffset={8}>
                   <div className="px-3 py-2">
                     <p className="text-sm font-medium text-gray-900">{getDisplayName()}</p>
                     <p className="text-xs text-gray-500">{user.email}</p>
@@ -168,27 +158,16 @@ const Header = () => {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-100">
             <nav className="flex flex-col gap-4">
-              {navLinks.map((link) =>
-                link.to ? (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className="text-sm text-gray-600"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="text-sm text-gray-600"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                  </a>
-                )
-              )}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  className="text-sm text-gray-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <div className="flex flex-col gap-2 pt-2">
                 {user ? (
                   <>

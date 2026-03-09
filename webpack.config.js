@@ -75,6 +75,7 @@ module.exports = async (env, options) => {
             new CopyWebpackPlugin({
                 patterns: [
                     { from: 'desktop-ui/api.js', to: 'api.js' },
+                    { from: 'desktop-ui/chatbot.js', to: 'chatbot.js' },
                     { from: 'desktop-ui/assets', to: 'assets', noErrorOnMissing: true },
                     { from: 'desktop-ui/shortcuts.json', to: 'shortcuts.json', noErrorOnMissing: true },
                     { from: 'desktop-ui/conslide_favicon.png', to: 'conslide_favicon.png', noErrorOnMissing: true },
