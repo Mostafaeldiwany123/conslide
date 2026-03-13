@@ -376,8 +376,27 @@ namespace Conslide
         // ── Direct command routing (from keyboard shortcut, no palette) ───────
         private void RunDirectCommand(string cmdId)
         {
+            System.Diagnostics.Debug.WriteLine($"[COMMAND] Executing: {cmdId}");
             if (CmdMap.TryGetValue(cmdId, out var action))
-                System.Threading.ThreadPool.QueueUserWorkItem(_ => action(_ppt));
+            {
+                System.Threading.ThreadPool.QueueUserWorkItem(_ => 
+                {
+                    try 
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[COMMAND] Running action for: {cmdId}");
+                        action(_ppt);
+                        System.Diagnostics.Debug.WriteLine($"[COMMAND] Completed: {cmdId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[COMMAND] Error in {cmdId}: {ex.Message}");
+                    }
+                });
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[COMMAND] Command not found: {cmdId}");
+            }
         }
 
         private void HidePalette()

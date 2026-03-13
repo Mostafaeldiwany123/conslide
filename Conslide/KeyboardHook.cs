@@ -237,7 +237,12 @@ namespace Conslide
                 if (_chordPrefix != null)
                 {
                     // Must still be in PPT to finish a chord
-                    if (!IsPowerPointFocused(out _)) { Reset(); return CallNextHookEx(_hookId, nCode, wParam, lParam); }
+                    if (!IsPowerPointFocused(out var focusedHwnd)) 
+                    { 
+                        System.Diagnostics.Debug.WriteLine($"[CHORD] PowerPoint lost focus during chord completion. Focused: {focusedHwnd}");
+                        Reset(); 
+                        return CallNextHookEx(_hookId, nCode, wParam, lParam); 
+                    }
 
                     string prefix = _chordPrefix;
                     CancelChord();

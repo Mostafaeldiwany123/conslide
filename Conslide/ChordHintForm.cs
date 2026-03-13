@@ -17,6 +17,21 @@ namespace Conslide
         [StructLayout(LayoutKind.Sequential)]
         struct RECT { public int Left, Top, Right, Bottom; }
 
+        // WS_EX_NOACTIVATE = 0x08000000 - Prevents window from being activated
+        // WS_EX_TOOLWINDOW = 0x00000080 - No taskbar entry, no alt-tab
+        private const int WS_EX_NOACTIVATE = 0x08000000;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                cp.ExStyle |= WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW;
+                return cp;
+            }
+        }
+
         public ChordHintForm()
         {
             FormBorderStyle = FormBorderStyle.None;
