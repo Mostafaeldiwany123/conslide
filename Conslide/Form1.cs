@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -15,6 +16,8 @@ namespace Conslide
         private PowerPointService _ppt = new PowerPointService();
         private System.Windows.Forms.Timer _stateTimer;
         private ChordHintForm _chordHint;
+        private NotifyIcon _trayIcon;
+        private ContextMenuStrip _trayMenu;
 
         private bool _restorePaletteWhenPptFocused = false;
 
@@ -43,6 +46,7 @@ namespace Conslide
 
         public Form1()
         {
+            SetupTrayIcon(); // Must be first so icon is available
             SetupForm();
             EnsureStartupRegistration();
             UpdateManager.Initialize(); // Initialize Velopack update manager
@@ -72,6 +76,147 @@ namespace Conslide
             else
             {
                 _pendingWebMessage = msg;
+            }
+        }
+
+        // ── System Tray Icon ───────────────────────────────────────────────────
+        private void SetupTrayIcon()
+        {
+            // Load the icon from the executable's directory
+            string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "conslide_favicon.ico");
+            Icon icon = null;
+            
+            if (System.IO.File.Exists(iconPath))
+            {
+                try { icon = new Icon(iconPath); }
+                catch { icon = SystemIcons.Application; }
+            }
+            else
+            {
+                icon = SystemIcons.Application; // Fallback to default
+            }
+
+            // Create context menu
+            _trayMenu = new ContextMenuStrip();
+            _trayMenu.Items.Add("Open Palette", null, (s, e) => ShowPalette());
+            _trayMenu.Items.Add("Check for Updates", null, async (s, e) => await CheckUpdatesWithNotification());
+            _trayMenu.Items.Add(new ToolStripSeparator());
+            _trayMenu.Items.Add("Restart App", null, (s, e) => RestartApp());
+            _trayMenu.Items.Add("Reset (Clear Data)", null, (s, e) => ResetApp());
+            _trayMenu.Items.Add(new ToolStripSeparator());
+            _trayMenu.Items.Add("Exit", null, (s, e) => ExitApp());
+
+            // Create tray icon
+            _trayIcon = new NotifyIcon
+            {
+                Icon = icon,
+                Text = "Conslide",
+                Visible = true,
+                ContextMenuStrip = _trayMenu
+            };
+
+            // Double-click opens palette
+            _trayIcon.DoubleClick += (s, e) => ShowPalette();
+        }
+
+        private void RestartApp()
+        {
+            try
+            {
+                _trayIcon.Visible = false;
+                _hook?.Uninstall();
+                Application.Restart();
+            }
+            catch { }
+        }
+
+        private void ResetApp()
+        {
+            var result = MessageBox.Show(
+                "This will clear all Conslide data and reset the app. Continue?",
+                "Reset Conslide",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    // Clear app data folder
+                    string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Conslide");
+                    if (Directory.Exists(appData))
+                        Directory.Delete(appData, true);
+
+                    // Clear local app data folder
+                    string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Conslide");
+                    if (Directory.Exists(localAppData))
+                        Directory.Delete(localAppData, true);
+
+                    RestartApp();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to reset: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void ExitApp()
+        {
+            _trayIcon.Visible = false;
+            _trayIcon.Dispose();
+            _hook?.Uninstall();
+            Application.Exit();
+        }
+
+        private async System.Threading.Tasks.Task CheckUpdatesWithNotification()
+        {
+            // Show checking dialog
+            var checkingForm = new Form
+            {
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterScreen,
+                Size = new Size(300, 120),
+                Text = "Check for Updates",
+                MaximizeBox = false,
+                MinimizeBox = false,
+                BackColor = Color.White
+            };
+            var label = new Label
+            {
+                Text = "Checking for updates...",
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Segoe UI", 10f)
+            };
+            checkingForm.Controls.Add(label);
+            checkingForm.Show();
+            
+            await UpdateManager.CheckForUpdatesAsync();
+            
+            checkingForm.Close();
+            
+            if (UpdateManager.HasPendingUpdate())
+            {
+                string version = UpdateManager.GetPendingUpdateVersion();
+                var result = MessageBox.Show(
+                    $"Update {version} is ready to install.\n\nRestart Conslide to apply the update?",
+                    "Update Available",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Information);
+                
+                if (result == DialogResult.Yes)
+                {
+                    UpdateManager.ApplyUpdateAndRestart();
+                }
+            }
+            else
+            {
+                MessageBox.Show(
+                    "You are up to date!",
+                    "No Updates Available",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 

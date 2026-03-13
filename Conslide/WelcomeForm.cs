@@ -188,8 +188,12 @@ namespace Conslide
                 }
                 else if (ev.TryGetWebMessageAsString() == "START")
                 {
-                    // Try to open PowerPoint so user lands right where they need to be
-                    try { System.Diagnostics.Process.Start("powerpnt.exe"); } catch { }
+                    // Only open PowerPoint if it's not already running
+                    bool powerPointRunning = System.Diagnostics.Process.GetProcessesByName("powerpnt").Length > 0;
+                    if (!powerPointRunning)
+                    {
+                        try { System.Diagnostics.Process.Start("powerpnt.exe"); } catch { }
+                    }
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
