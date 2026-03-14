@@ -40,8 +40,8 @@ jobs:
         # Update version in Package.appxmanifest
         $manifest = "Conslide.Package\Package.appxmanifest"
         (Get-Content $manifest) -replace 'Version="[^"]*"', "Version=`"$version.0`"" | Set-Content $manifest
-        # Build MSIX package (without restoring, just packaging)
-        msbuild Conslide.Package\Conslide.Package.wapproj /p:Configuration=Release /p:Platform=x64 /p:SkipValidation=true /p:AppxPackageDir="..\Packages\" /p:UapAppxPackageBuildMode=StoreUpload
+        # Build MSIX package
+        msbuild Conslide.Package\Conslide.Package.wapproj /p:Configuration=Release /p:Platform=x64 /p:AppxPackageDir="..\Packages\" /p:UapAppxPackageBuildMode=StoreUpload
 
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v1

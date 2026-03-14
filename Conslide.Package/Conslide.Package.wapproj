@@ -60,11 +60,10 @@
     <Content Include="Assets\Wide310x150Logo.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Conslide\Conslide.csproj">
-      <Project>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</Project>
-      <Name>Conslide</Name>
-      <TargetPlatform>Desktop</TargetPlatform>
-    </ProjectReference>
+    <Content Include="..\Conslide\bin\Release\net48\**\*">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <PropertyGroup Condition="'$(RestoreProjectStyle)' == ''">
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
