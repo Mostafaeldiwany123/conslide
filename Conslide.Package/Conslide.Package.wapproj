@@ -39,6 +39,8 @@
     <WindowsXamlEnableUpdate>true</WindowsXamlEnableUpdate>
     <PackageCertificateKeyFile>Conslide.Package_TemporaryKey.pfx</PackageCertificateKeyFile>
     <PackageCertificateThumbprint>0</PackageCertificateThumbprint>
+    <AppxPackage>true</AppxPackage>
+    <AppxPackageDir>$(SolutionDir)Packages\</AppxPackageDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
@@ -61,8 +63,7 @@
     <ProjectReference Include="..\Conslide\Conslide.csproj">
       <Project>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</Project>
       <Name>Conslide</Name>
-      <SetPlatform>Platform=Win32</SetPlatform>
-      <SetTargetFramework>TargetFramework=.NETFramework,Version=v4.8</SetTargetFramework>
+      <TargetPlatform>Desktop</TargetPlatform>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition="'$(RestoreProjectStyle)' == ''">
