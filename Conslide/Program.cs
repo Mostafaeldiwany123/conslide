@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using Velopack;
 
 namespace Conslide
 {
@@ -9,16 +8,8 @@ namespace Conslide
         [STAThread]
         static void Main()
         {
-            // Configure Velopack with auto-restart on update
-            VelopackApp.Build()
-                .WithFirstRun((v) => {
-                    // First install - no special action needed
-                })
-                .WithRestarted((v) => {
-                    // App was restarted after update
-                    System.Diagnostics.Debug.WriteLine($"[Velopack] Restarted after update to {v}");
-                })
-                .Run();
+            // Set working directory to app location (important for MSIX packaged apps)
+            System.IO.Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

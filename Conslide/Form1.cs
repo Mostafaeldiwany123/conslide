@@ -49,35 +49,11 @@ namespace Conslide
             SetupTrayIcon(); // Must be first so icon is available
             SetupForm();
             EnsureStartupRegistration();
-            UpdateManager.Initialize(); // Initialize Velopack update manager
-            UpdateManager.UpdateReady += OnUpdateReady;
             SetupWebView();
             SetupHook();
             SetupStatePoller();
-            
-            // Check for updates on startup
-            System.Threading.Tasks.Task.Run(async () =>
-            {
-                await UpdateManager.CheckForUpdatesAsync();
-            });
         }
 
-        private void OnUpdateReady()
-        {
-            if (InvokeRequired) { BeginInvoke(new Action(OnUpdateReady)); return; }
-
-            string version = UpdateManager.GetPendingUpdateVersion();
-            string msg = $"UPDATE_READY:{version}";
-
-            if (webView?.CoreWebView2 != null)
-            {
-                webView.CoreWebView2.PostWebMessageAsString(msg);
-            }
-            else
-            {
-                _pendingWebMessage = msg;
-            }
-        }
 
         // ── System Tray Icon ───────────────────────────────────────────────────
         private void SetupTrayIcon()
@@ -99,7 +75,6 @@ namespace Conslide
             // Create context menu
             _trayMenu = new ContextMenuStrip();
             _trayMenu.Items.Add("Open Palette", null, (s, e) => ShowPalette());
-            _trayMenu.Items.Add("Check for Updates", null, async (s, e) => await CheckUpdatesWithNotification());
             _trayMenu.Items.Add(new ToolStripSeparator());
             _trayMenu.Items.Add("Restart App", null, (s, e) => RestartApp());
             _trayMenu.Items.Add("Reset (Clear Data)", null, (s, e) => ResetApp());
@@ -169,56 +144,6 @@ namespace Conslide
             Application.Exit();
         }
 
-        private async System.Threading.Tasks.Task CheckUpdatesWithNotification()
-        {
-            // Show checking dialog
-            var checkingForm = new Form
-            {
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition = FormStartPosition.CenterScreen,
-                Size = new Size(300, 120),
-                Text = "Check for Updates",
-                MaximizeBox = false,
-                MinimizeBox = false,
-                BackColor = Color.White
-            };
-            var label = new Label
-            {
-                Text = "Checking for updates...",
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font("Segoe UI", 10f)
-            };
-            checkingForm.Controls.Add(label);
-            checkingForm.Show();
-            
-            await UpdateManager.CheckForUpdatesAsync();
-            
-            checkingForm.Close();
-            
-            if (UpdateManager.HasPendingUpdate())
-            {
-                string version = UpdateManager.GetPendingUpdateVersion();
-                var result = MessageBox.Show(
-                    $"Update {version} is ready to install.\n\nRestart Conslide to apply the update?",
-                    "Update Available",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Information);
-                
-                if (result == DialogResult.Yes)
-                {
-                    UpdateManager.ApplyUpdateAndRestart();
-                }
-            }
-            else
-            {
-                MessageBox.Show(
-                    "You are up to date!",
-                    "No Updates Available",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-            }
-        }
 
         // ── Form ──────────────────────────────────────────────────────────────
  private void SetupForm()
@@ -470,19 +395,6 @@ namespace Conslide
             UpdateProStatus();
             webView.CoreWebView2.PostWebMessageAsString("FOCUS_WITH_SESSION:" + sessionJson);
 
-            // Notify if update is ready to install
-            if (UpdateManager.HasPendingUpdate())
-            {
-                string version = UpdateManager.GetPendingUpdateVersion();
-                // Show simple notification in palette
-                webView.CoreWebView2.PostWebMessageAsString($"UPDATE_READY:{version}");
-            }
-            else 
-            {
-                // Check silently in the background (UpdateManager handles rate-limiting)
-                System.Threading.Tasks.Task.Run(async () => await UpdateManager.CheckForUpdatesAsync());
-            }
-
             this.Opacity = 1;
 
             Activate();
@@ -650,12 +562,6 @@ namespace Conslide
                 return;
             }
 
-            if (msg == "APPLY_UPDATE")
-            {
-                // Apply update and restart
-                UpdateManager.ApplyUpdateAndRestart();
-                return;
-            }
 
             // ── AI Agent Chatbot Commands ─────────────────────────────────────
             if (msg.StartsWith("CREATE_SLIDE_FROM_JSON:"))

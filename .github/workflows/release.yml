@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build MSIX Package
 
 on:
   push:
@@ -26,31 +26,31 @@ jobs:
         npm ci
         npm run build
 
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
     - name: Restore NuGet packages
       run: |
-        dotnet restore Conslide/Conslide.csproj
+        nuget restore Conslide.sln
 
-    - name: Build Conslide
+    - name: Build Conslide (Release x64)
       run: |
-        dotnet build Conslide/Conslide.csproj -c Release --no-restore
+        msbuild Conslide.sln /p:Configuration=Release /p:Platform=x64 /p:RestorePackages=false
 
-    - name: Install Velopack
-      run: |
-        dotnet tool install -g vpk
-
-    - name: Create Velopack Release
+    - name: Create MSIX Package
       run: |
         $version = "${{ github.ref_name }}".Replace("v", "")
-        vpk pack -u Conslide -v $version -p Conslide/bin/Release/net48 -e Conslide.exe
+        # Update version in Package.appxmanifest
+        $manifest = "Conslide.Package\Package.appxmanifest"
+        (Get-Content $manifest) -replace 'Version="[^"]*"', "Version=`"$version.0`"" | Set-Content $manifest
+        # Build MSIX package
+        msbuild Conslide.Package\Conslide.Package.wapproj /p:Configuration=Release /p:Platform=x64 /p:AppxBundlePlatforms="x64" /p:AppxPackageDir="..\Packages\" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload
 
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          Releases/*.exe
-          Releases/*.nupkg
-          Releases/*.zip
-          Releases/*.json
-          Releases/RELEASES*
+          Packages/*.msixupload
+          Packages/*.msix
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
