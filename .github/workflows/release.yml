@@ -1,4 +1,4 @@
-name: Build MSIX Package
+name: Build and Release
 
 on:
   push:
@@ -26,28 +26,27 @@ jobs:
         npm ci
         npm run build
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Build Conslide (Release x64)
+    - name: Restore NuGet packages
       run: |
-        nuget restore Conslide\Conslide.csproj
-        msbuild Conslide\Conslide.csproj /p:Configuration=Release /p:Platform=x64
+        dotnet restore Conslide/Conslide.csproj
 
-    - name: Create MSIX Package
+    - name: Build Conslide
       run: |
-        $version = "${{ github.ref_name }}".Replace("v", "")
-        # Update version in Package.appxmanifest
-        $manifest = "Conslide.Package\Package.appxmanifest"
-        (Get-Content $manifest) -replace 'Version="[^"]*"', "Version=`"$version.0`"" | Set-Content $manifest
-        # Build MSIX package
-        msbuild Conslide.Package\Conslide.Package.wapproj /p:Configuration=Release /p:Platform=x64 /p:AppxPackageDir="..\Packages\" /p:UapAppxPackageBuildMode=StoreUpload
+        dotnet build Conslide/Conslide.csproj -c Release --no-restore
+
+    - name: Zip Release Files
+      run: |
+        Compress-Archive -Path "Conslide/bin/Release/net48/*" -DestinationPath "Conslide-${{ github.ref_name }}.zip"
 
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v1
       with:
+        name: "Conslide ${{ github.ref_name }}"
+        body: |
+          ## Conslide ${{ github.ref_name }}
+
+          Download `Conslide-${{ github.ref_name }}.zip`, extract it, and run `Conslide.exe`.
         files: |
-          Packages/*.msixupload
-          Packages/*.msix
+          Conslide-${{ github.ref_name }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
