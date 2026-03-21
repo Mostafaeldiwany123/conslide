@@ -42,72 +42,34 @@ jobs:
     - name: Prepare MSIX staging folder
       shell: pwsh
       run: |
-        # Get version from tag (e.g. v1.2.0 -> 1.2.0.0)
         $tag = "${{ github.ref_name }}"
         $version = $tag.TrimStart("v") + ".0"
         Write-Host "Building MSIX version: $version"
 
-        # Create staging directory
         $staging = "msix_staging"
         New-Item -ItemType Directory -Force -Path $staging | Out-Null
 
-        # Copy all built app files
         Copy-Item -Path "Conslide\bin\Release\net48\*" -Destination $staging -Recurse -Force
 
-        # Copy store assets into staging/Assets
         New-Item -ItemType Directory -Force -Path "$staging\Assets" | Out-Null
         Copy-Item -Path "Conslide.Package\Assets\*" -Destination "$staging\Assets" -Recurse -Force
 
-        # Generate AppxManifest.xml from the existing manifest, updating version
-        $manifestContent = @"
-<?xml version="1.0" encoding="utf-8"?>
-<Package
-  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+    - name: Generate AppxManifest.xml
+      shell: pwsh
+      run: |
+        $tag = "${{ github.ref_name }}"
+        $version = $tag.TrimStart("v") + ".0"
 
-  <Identity
-    Name="Mostafaeldiwany123.Conslide"
-    Publisher="CN=Mostafa Diwany"
-    Version="$version"
-    ProcessorArchitecture="x64" />
+        $manifest = "Conslide.Package\Package.appxmanifest"
+        $content = Get-Content $manifest -Raw
 
-  <Properties>
-    <DisplayName>Conslide</DisplayName>
-    <PublisherDisplayName>Mostafa Diwany</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
-  </Properties>
+        $content = $content -replace 'Version="[^"]*"', "Version=`"$version`""
 
-  <Dependencies>
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.22000.0" />
-  </Dependencies>
+        if ($content -notmatch 'ProcessorArchitecture') {
+          $content = $content -replace '(Version="[^"]*")', "`$1`n    ProcessorArchitecture=`"x64`""
+        }
 
-  <Resources>
-    <Resource Language="en-us" />
-  </Resources>
-
-  <Applications>
-    <Application Id="Conslide" Executable="Conslide.exe" EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements
-        DisplayName="Conslide"
-        Description="PowerPoint productivity tool for faster slide creation"
-        BackgroundColor="transparent"
-        Square150x150Logo="Assets\Square150x150Logo.png"
-        Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
-      </uap:VisualElements>
-    </Application>
-  </Applications>
-
-  <Capabilities>
-    <rescap:Capability Name="runFullTrust" />
-    <Capability Name="internetClient" />
-  </Capabilities>
-
-</Package>
-"@
-        Set-Content -Path "$staging\AppxManifest.xml" -Value $manifestContent -Encoding UTF8
+        Set-Content -Path "msix_staging\AppxManifest.xml" -Value $content -Encoding UTF8
         Write-Host "Manifest written with version $version"
 
     - name: Create self-signed cert for signing
