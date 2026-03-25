@@ -63,11 +63,18 @@
             </div>`;
         }
 
+        let reportBtnHtml = role === 'bot' ? 
+            `<button class="chat-report-btn" onclick="window.reportAIContent(this)" title="Report inappropriate content">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                Report
+            </button>` : '';
+
         msgDiv.innerHTML = `
             <div class="chat-msg-avatar">${avatarContent}</div>
             <div class="chat-msg-content">
                 <div class="chat-msg-text">${formatText(text)}</div>
                 ${extraHtml}
+                ${reportBtnHtml}
             </div>
         `;
 
@@ -489,4 +496,14 @@
             addMessage('bot', "Error: " + err.message);
         }
     }
+    window.reportAIContent = function(btn) {
+        if (confirm("Would you like to report this AI-generated response as inappropriate? This helps us improve our safety filters.")) {
+            btn.innerHTML = "Reported";
+            btn.disabled = true;
+            btn.style.opacity = "0.6";
+            btn.style.cursor = "default";
+            // In a production app, you would send this to your backend
+            console.log("AI Content Reported");
+        }
+    };
 })();

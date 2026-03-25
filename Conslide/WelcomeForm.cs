@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Net;
 using System.Windows.Forms;
@@ -25,7 +25,7 @@ namespace Conslide
         private async void SetupUI()
         {
             this.Text = "Welcome to Conslide";
-            this.Size = new Size(560, 520);
+            this.Size = new Size(560, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -202,7 +202,7 @@ namespace Conslide
 
         private void ShowSuccessPage()
         {
-            this.Size = new Size(880, 520);
+            this.Size = new Size(560, 600);
             this.CenterToScreen();
 
             string html = @"
@@ -212,49 +212,41 @@ namespace Conslide
                 <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     body { " + BASE_FONT + @" display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #ffffff; color: #111827; overflow: hidden; -webkit-font-smoothing: antialiased; }
-                    .wrapper { display: flex; gap: 32px; width: 100%; height: 100%; padding: 32px; align-items: center; }
+                    .wrapper { max-width: 420px; width: 100%; text-align: center; padding: 40px; }
                     
-                    .video-col { flex: 1.2; }
-                    .video-wrapper { width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); aspect-ratio: 16 / 9; }
-                    iframe { border: none; width: 100%; height: 100%; display: block; }
+                    .logo-check { width: 64px; height: 64px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+                    h1 { font-size: 24px; font-weight: 600; color: #111827; letter-spacing: -0.02em; margin-bottom: 8px; }
+                    .subtitle { font-size: 15px; color: #6B7280; margin-bottom: 32px; }
+                    
+                    .instructions { background-color: #F9FAFB; padding: 20px; border-radius: 12px; font-size: 14px; border: 1px solid #E5E7EB; text-align: left; margin-bottom: 32px; }
+                    .instructions strong { display: block; margin-bottom: 12px; color: #111827; font-weight: 600; }
+                    .instructions .steps { color: #4B5563; line-height: 1.8; }
+                    .kbd { display: inline-block; padding: 1px 6px; background-color: #fff; border: 1px solid #D1D5DB; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 12px; font-weight: 600; color: #374151; box-shadow: 0 1px 1px rgba(0,0,0,0.04); }
 
-                    .info-col { flex: 1; display: flex; flex-direction: column; gap: 16px; }
-                    h1 { font-size: 22px; font-weight: 600; color: #111827; letter-spacing: -0.02em; }
-                    .subtitle { font-size: 13px; color: #6B7280; margin-top: 2px; }
-                    .instructions { background-color: #F9FAFB; padding: 16px 18px; border-radius: 10px; font-size: 13px; border: 1px solid #E5E7EB; }
-                    .instructions strong { display: block; margin-bottom: 10px; color: #111827; font-size: 13px; font-weight: 600; }
-                    .instructions .steps { color: #4B5563; line-height: 1.9; }
-                    .kbd { display: inline-block; padding: 1px 5px; background-color: #fff; border: 1px solid #D1D5DB; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 11px; font-weight: 600; color: #374151; box-shadow: 0 1px 1px rgba(0,0,0,0.04); margin: 0 1px; }
-
-                    .start-btn { background-color: #7C3AED; color: white; border: none; padding: 0; height: 42px; font-size: 14px; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(124,58,237,0.25); " + BASE_FONT + @" }
-                    .start-btn:hover { background-color: #6D28D9; }
+                    .start-btn { background-color: #7C3AED; color: white; border: none; width: 100%; height: 48px; font-size: 16px; font-weight: 500; border-radius: 10px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(124,58,237,0.25); " + BASE_FONT + @" }
+                    .start-btn:hover { background-color: #6D28D9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
                 </style>
             </head>
             <body>
                 <div class='wrapper'>
-                    <div class='video-col'>
-                        <div class='video-wrapper'>
-                            <iframe src='https://www.youtube.com/embed/uHhqS9Bhi2E' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe>
+                    <div class='logo-check'>
+                        <svg width=""32"" height=""32"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""3"" stroke-linecap=""round"" stroke-linejoin=""round"">
+                            <polyline points=""20 6 9 17 4 12""/>
+                        </svg>
+                    </div>
+                    <h1>You're connected!</h1>
+                    <p class='subtitle'>Your account is successfully linked.</p>
+
+                    <div class='instructions'>
+                        <strong>Quick Start Guide</strong>
+                        <div class='steps'>
+                            1. Open any PowerPoint presentation<br/>
+                            2. Press <span class='kbd'>Alt</span> + <span class='kbd'>Space</span> to open the palette<br/>
+                            3. Use AI agents or type commands instantly
                         </div>
                     </div>
 
-                    <div class='info-col'>
-                        <div>
-                            <h1>You're connected!</h1>
-                            <p class='subtitle'>Watch the tutorial, then get started.</p>
-                        </div>
-
-                        <div class='instructions'>
-                            <strong>Quick start</strong>
-                            <div class='steps'>
-                                1. Open PowerPoint with a presentation<br/>
-                                2. Press <span class='kbd'>Alt</span> + <span class='kbd'>Space</span> to open the palette<br/>
-                                3. Type commands or use AI features
-                            </div>
-                        </div>
-
-                        <button class='start-btn' onclick='window.chrome.webview.postMessage(""START"")'>Start Using Conslide</button>
-                    </div>
+                    <button class='start-btn' onclick='window.chrome.webview.postMessage(""START"")'>Start Using Conslide</button>
                 </div>
             </body>
             </html>
