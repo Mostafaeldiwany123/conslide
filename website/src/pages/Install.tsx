@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Download, Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 
 const WindowsIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -13,29 +12,7 @@ const WindowsIcon = ({ className }: { className?: string }) => (
 const Install = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [downloadUrl, setDownloadUrl] = useState<string>('');
-  const [version, setVersion] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('https://api.github.com/repos/Mostafaeldiwany123/conslide/releases/latest')
-      .then(res => res.json())
-      .then(data => {
-        setVersion(data.tag_name);
-        setDownloadUrl(`https://github.com/Mostafaeldiwany123/conslide/releases/download/${data.tag_name}/Conslide-win-Setup.exe`);
-        setLoading(false);
-      })
-      .catch(() => {
-        setDownloadUrl('https://github.com/Mostafaeldiwany123/conslide/releases/latest/download/Conslide-win-Setup.exe');
-        setLoading(false);
-      });
-  }, []);
-
-  const handleDownload = () => {
-    if (downloadUrl) {
-      window.location.href = downloadUrl;
-    }
-  };
+  const productId = '9mzsnsnq2bg4';
 
   return (
     <div className="min-h-screen bg-white">
@@ -65,21 +42,19 @@ const Install = () => {
             <p className="text-gray-500">
               PowerPoint add-in for Windows
             </p>
-            {version && (
-              <p className="text-sm text-gray-400 mt-1">{version}</p>
-            )}
           </div>
 
           {/* Download Button */}
           <div className="flex justify-center mb-4">
             <Button
+              asChild
               size="lg"
-              onClick={handleDownload}
-              disabled={loading}
               className="bg-purple-600 hover:bg-purple-700 text-white h-12 px-8"
             >
-              <WindowsIcon className="w-5 h-5 mr-2" />
-              {loading ? 'Loading...' : 'Download for Windows'}
+              <a href={`ms-windows-store://pdp/?productid=${productId}`}>
+                <WindowsIcon className="w-5 h-5 mr-2" />
+                Get it from Microsoft Store
+              </a>
             </Button>
           </div>
 
@@ -112,7 +87,7 @@ const Install = () => {
                   <span className="text-xs font-medium text-gray-600">1</span>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-700">Download and run the installer</p>
+                  <p className="text-sm text-gray-700">Install Conslide from the Microsoft Store</p>
                 </div>
               </div>
               <div className="flex gap-4">
